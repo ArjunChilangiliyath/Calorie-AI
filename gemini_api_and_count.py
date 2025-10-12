@@ -268,7 +268,14 @@ for item, unit in nutrition_items:
         """Show error message."""
         self.progress.stop()
         self.analyze_btn.configure(state="normal")
-        
+        def main():
+    """Main function to run the GUI application."""
+    root = tk.Tk()
+    app = FoodAnalyzerGUI(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
         self.results_text.delete(1.0, tk.END)
         self.results_text.insert(tk.END, f"❌ ERROR: {error_message}\n")
         
