@@ -11,6 +11,7 @@ import json
 from datetime import datetime
 import threading
 import queue
+
 class HighCapacityFoodClassifier(nn.Module):
     def __init__(self, num_classes, model_type="efficientnet_b3"):
         super(HighCapacityFoodClassifier, self).__init__()
@@ -42,6 +43,7 @@ class HighCapacityFoodClassifier(nn.Module):
                 raise AttributeError("Backbone has no classifier/fc layer")
         except Exception as e:
             raise RuntimeError(f"Classifier build failed: {str(e)}")
+
     def _build_classifier(self, in_features, num_classes):
         return nn.Sequential(
             nn.Dropout(0.3),
@@ -59,6 +61,7 @@ class HighCapacityFoodClassifier(nn.Module):
             nn.Dropout(0.2),
             nn.Linear(512, num_classes)
         )
+
     def forward(self, x):
         return self.backbone(x)
 
@@ -83,6 +86,7 @@ class FoodClassifierGUI:
         
         if os.path.exists(self.default_model_path):
             self.load_model_async(self.default_model_path)
+    
     def setup_ui(self):
         main_frame = ttk.Frame(self.root, padding="20")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
@@ -103,12 +107,19 @@ class FoodClassifierGUI:
         self.model_path_var = tk.StringVar(value=self.default_model_path)
         self.model_path_entry = ttk.Entry(model_frame, textvariable=self.model_path_var, width=60)
         self.model_path_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 10))
+        
         ttk.Button(model_frame, text="Browse", command=self.browse_model).grid(row=0, column=2)
         ttk.Button(model_frame, text="Load Model", command=self.load_model_button).grid(row=0, column=3, padx=(10, 0))
         
         config_frame = ttk.Frame(model_frame)
         config_frame.grid(row=2, column=0, columnspan=4, sticky=(tk.W, tk.E), pady=(10, 0))
-           ttk.Label(config_frame, text="Model Type:").grid(row=0, column=2, sticky=tk.W, padx=(0, 10))
+        
+        ttk.Label(config_frame, text="Num Classes:").grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
+        self.num_classes_var = tk.StringVar(value="1052")
+        self.num_classes_entry = ttk.Entry(config_frame, textvariable=self.num_classes_var, width=10)
+        self.num_classes_entry.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+        
+        ttk.Label(config_frame, text="Model Type:").grid(row=0, column=2, sticky=tk.W, padx=(0, 10))
         self.model_type_var = tk.StringVar(value="efficientnet_b3")
         self.model_type_combo = ttk.Combobox(config_frame, textvariable=self.model_type_var, 
                                            values=["efficientnet_b0", "efficientnet_b1", "efficientnet_b2", 
@@ -126,8 +137,4 @@ class FoodClassifierGUI:
         self.model_status_var = tk.StringVar(value="Model not loaded")
         self.model_status_label = ttk.Label(model_frame, textvariable=self.model_status_var, 
                                           foreground="red")
-        self.model_status_label.grid(row=3, column=0, columnspan=4, pady=(10, 0))    
-        ttk.Label(config_frame, text="Num Classes:").grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
-        self.num_classes_var = tk.StringVar(value="1052")
-        self.num_classes_entry = ttk.Entry(config_frame, textvariable=self.num_classes_var, width=10)
-        self.num_classes_entry.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+        self.model_status_label.grid(row=3, column=0, columnspan=4, pady=(10, 0))
